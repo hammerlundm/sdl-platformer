@@ -27,8 +27,7 @@ int main(int argc, char **argv) {
             }
         }
         SDL_RenderClear(renderer);
-        drawSprite(s1);
-        drawSprite(s2);
+        map(&sprites, drawSprite);
         SDL_RenderPresent(renderer);
     }
     deleteSprite(s1);
@@ -44,6 +43,7 @@ int init() {
         return -1;
     }
     running = SDL_TRUE;
+    sprites = newVector();
     window = SDL_CreateWindow("Game!", SDL_WINDOWPOS_CENTERED, 
                               SDL_WINDOWPOS_CENTERED, 640, 480, 0);
     if (!window) {
@@ -64,6 +64,7 @@ int init() {
 }
 
 void quit() {
+    deleteVector(&sprites);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();

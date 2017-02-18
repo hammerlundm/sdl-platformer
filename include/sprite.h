@@ -15,6 +15,6 @@ void deleteSprite(Component *sprite);
 void updateSprite(Uint32 interval, Component *self);
 void respondsprite(SDL_Event *event, Component *self);
 
-void drawSprite(Component *sprite);
+void drawSprite(void *sprite);
 
 #endif /*SPRITE_H*/

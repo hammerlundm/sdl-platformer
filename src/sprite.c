@@ -13,6 +13,7 @@ Component *Sprite(SDL_Texture *texture, SDL_Rect src_rect, SDL_Rect dst_rect) {
     sprite->update = NULL;
     sprite->respond = NULL;
 
+    insert(&sprites, sprite);
     return sprite;
 }
 
@@ -22,7 +23,8 @@ void deleteSprite(Component *sprite) {
     sprite = NULL;
 }
 
-void drawSprite(Component *sprite) {
-    SpriteData *data = sprite->data;
+void drawSprite(void *sprite) {
+    Component *s = sprite;
+    SpriteData *data = s->data;
     SDL_RenderCopy(renderer, data->texture, &data->src_rect, &data->dst_rect);
 }

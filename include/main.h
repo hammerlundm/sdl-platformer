@@ -2,6 +2,7 @@
 #define MAIN_H
 
 #include "SDL2/SDL.h"
+#include "vector.h"
 
 typedef struct Component Component;
 struct Component {
@@ -14,6 +15,7 @@ struct Component {
 SDL_Window *window;
 SDL_Renderer *renderer;
 SDL_bool running;
+vector sprites;
 
 int init();
 void quit();
