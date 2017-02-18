@@ -14,7 +14,7 @@ debug: release
 release: $(OBJECTS)
 	$(CC) $^ $(LIBS) -o $(EXEC)
 
-%.o: src/%.c
+%.o: src/%.c $(HEADERS)
 	$(CC) -c $< -o $@
 
 clean:
