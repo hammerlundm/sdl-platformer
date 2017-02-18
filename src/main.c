@@ -13,7 +13,10 @@ int main(int argc, char **argv) {
     }
     SDL_Surface *image = IMG_Load("test.png");
     SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, image);
-    Sprite s = (Sprite) {texture, (SDL_Rect) {0, 0, 64, 64}, (SDL_Rect) {0, 0, 128, 128}};
+    Component *s1 = Sprite(texture, (SDL_Rect) {0, 0, 64, 64}, 
+                          (SDL_Rect) {0, 0, 128, 128});
+    Component *s2 = Sprite(texture, (SDL_Rect) {0, 0, 64, 64},
+                           (SDL_Rect) {200, 100, 256, 32});
     SDL_Event evt;
     while (running) {
         while (SDL_PollEvent(&evt)) {
@@ -24,9 +27,12 @@ int main(int argc, char **argv) {
             }
         }
         SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, s.texture, &s.source_rect, &s.screen_rect);
+        drawSprite(s1);
+        drawSprite(s2);
         SDL_RenderPresent(renderer);
     }
+    deleteSprite(s1);
+    deleteSprite(s2);
     quit();
 }
 
@@ -57,9 +63,8 @@ int init() {
     return 0;
 }
 
-int quit() {
+void quit() {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
-    return 0;
 }

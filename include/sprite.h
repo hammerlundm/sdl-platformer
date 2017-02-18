@@ -1,12 +1,20 @@
 #ifndef SPRITE_H
 #define SPRITE_H
 
-#include "SDL2/SDL.h"
+#include "main.h"
 
 typedef struct {
     SDL_Texture *texture;
-    SDL_Rect source_rect;
-    SDL_Rect screen_rect;
-} Sprite;
+    SDL_Rect src_rect;
+    SDL_Rect dst_rect;
+} SpriteData;
 
-#endif
+Component *Sprite(SDL_Texture *texture, SDL_Rect src_rect, SDL_Rect dst_rect);
+void deleteSprite(Component *sprite);
+
+void updateSprite(Uint32 interval, Component *self);
+void respondsprite(SDL_Event *event, Component *self);
+
+void drawSprite(Component *sprite);
+
+#endif /*SPRITE_H*/
