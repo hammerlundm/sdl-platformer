@@ -46,3 +46,15 @@ Component *getComponent(GameObject *obj, Type t) {
     }
     return NULL;
 }
+
+void move(GameObject *obj, float x, float y) {
+    obj->x += x;
+    obj->y += y;
+    SDL_Event event;
+    //SDL_memset(&evt, 0 sizeof(evt));
+    event.type = MOVEEVENT;
+    event.user.code = 0;
+    event.user.data1 = obj;
+    event.user.data2 = 0;
+    SDL_PushEvent(&event);
+}

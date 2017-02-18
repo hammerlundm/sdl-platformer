@@ -1,5 +1,5 @@
 #include "sprite.h"
-#include <stdlib.h>
+#include "game_object.h"
 
 Component *Sprite(SDL_Texture *texture, SDL_Rect src_rect, SDL_Rect dst_rect) {
     Component *sprite = malloc(sizeof(Component));
@@ -11,7 +11,7 @@ Component *Sprite(SDL_Texture *texture, SDL_Rect src_rect, SDL_Rect dst_rect) {
 
     sprite->data = data;
     sprite->update = NULL;
-    sprite->respond = NULL;
+    sprite->respond = respondSprite;
     sprite->type = SPRITE;
 
     insert(sprites, sprite);
@@ -29,6 +29,15 @@ void deleteSprite(Component *sprite) {
         printf("Error: Component at %p is not a sprite\n", sprite);
     }
     #endif
+}
+
+void respondSprite(SDL_Event *event, GameObject *self) {
+    if (event->type == MOVEEVENT && event->user.data1 == self) {
+        Component *sprite = getComponent(self, SPRITE);
+        SpriteData *data = sprite->data;
+        data->dst_rect.x = self->x;
+        data->dst_rect.y = self->y;
+    }
 }
 
 void drawSprite(void *sprite) {

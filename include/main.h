@@ -20,6 +20,7 @@ typedef struct {
 } Component;
 
 //Global Variables
+Uint32 MOVEEVENT;
 SDL_Window *window;
 SDL_Renderer *renderer;
 SDL_bool running;

@@ -18,13 +18,14 @@ int main(int argc, char **argv) {
     Component *s1 = Sprite(texture, (SDL_Rect) {0, 0, 64, 64}, 
                           (SDL_Rect) {0, 0, 128, 128});
     Component *s2 = Sprite(texture, (SDL_Rect) {0, 0, 64, 64},
-                           (SDL_Rect) {200, 100, 256, 32});
+                           (SDL_Rect) {0, 0, 256, 32});
     Component *thing = Control();
     GameObject *obj1 = newGameObject();
     GameObject *obj2 = newGameObject();
     insert(obj1->components, s1);
     insert(obj2->components, s2);
     insert(obj2->components, thing);
+    move(obj2, 100, 200);
     SDL_Event evt;
     GameObject *temp;
     while (running) {
@@ -61,6 +62,7 @@ int init() {
     running = SDL_TRUE;
     sprites = newVector();
     objects = newVector();
+    MOVEEVENT = SDL_RegisterEvents(1);
     window = SDL_CreateWindow("Game!", SDL_WINDOWPOS_CENTERED, 
                               SDL_WINDOWPOS_CENTERED, 640, 480, 0);
     if (!window) {

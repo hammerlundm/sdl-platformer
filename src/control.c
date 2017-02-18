@@ -31,23 +31,17 @@ void deleteControl(Component *control) {
 
 void respondControl(SDL_Event *evt, GameObject *self) {
     if (evt->type == SDL_KEYDOWN) {
-        Component *sprite = getComponent(self, SPRITE);
-        if (sprite) {
-            SpriteData *data = sprite->data;
-            switch (evt->key.keysym.sym) {
-            case SDLK_w:
-                data->dst_rect.y -= 1;
-                break;
-            case SDLK_a:
-                data->dst_rect.x -= 1;
-                break;
-            case SDLK_s:
-                data->dst_rect.y += 1;
-                break;
-            case SDLK_d:
-                data->dst_rect.x += 1;
-                break;
-            }
+        if (evt->key.keysym.sym == SDLK_w) {
+            move(self, 0, -1);
+        }
+        else if (evt->key.keysym.sym == SDLK_a) {
+            move(self, -1, 0);
+        }
+        else if (evt->key.keysym.sym == SDLK_s) {
+            move(self, 0, 1);
+        }
+        else if (evt->key.keysym.sym == SDLK_d) {
+            move(self, 1, 0);
         }
     }
 }
