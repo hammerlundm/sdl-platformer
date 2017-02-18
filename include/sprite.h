@@ -5,11 +5,14 @@
 
 typedef struct {
     SDL_Texture *texture;
-    SDL_Rect src_rect;
-    SDL_Rect dst_rect;
+    Uint32 time;
+    Uint32 time_left;
+    int frame;
+    vector *src_rects;
+    SDL_Rect *dst_rect;
 } SpriteData;
 
-Component *Sprite(SDL_Texture *texture, SDL_Rect src_rect, SDL_Rect dst_rect);
+Component *Sprite(SDL_Texture *texture, int frames, SDL_Rect *src_rects, SDL_Rect *dst_rect, Uint32 time);
 void deleteSprite(Component *sprite);
 
 void updateSprite(Uint32 interval, GameObject *self);

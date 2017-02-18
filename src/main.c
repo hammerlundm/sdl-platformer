@@ -15,10 +15,11 @@ int main(int argc, char **argv) {
     }
     SDL_Surface *image = IMG_Load("test.png");
     SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, image);
-    Component *s1 = Sprite(texture, (SDL_Rect) {0, 0, 64, 64}, 
-                          (SDL_Rect) {0, 0, 128, 128});
-    Component *s2 = Sprite(texture, (SDL_Rect) {0, 0, 64, 64},
-                           (SDL_Rect) {0, 0, 256, 32});
+    SDL_Rect rects[4] = {{0, 0, 64, 64}, {0, 64, 64, 64}, {64, 0, 64, 64}, {64, 64, 64, 64}};
+    SDL_Rect r1 = {0, 0, 128, 128};
+    SDL_Rect r2 = {0, 0, 256, 32};
+    Component *s1 = Sprite(texture, 4, rects, &r1, 200);
+    Component *s2 = Sprite(texture, 2, rects+1, &r2, 100);
     Component *thing = Control();
     GameObject *obj1 = newGameObject();
     GameObject *obj2 = newGameObject();
@@ -26,8 +27,10 @@ int main(int argc, char **argv) {
     insert(obj2->components, s2);
     insert(obj2->components, thing);
     move(obj2, 100, 200);
+
     SDL_Event evt;
     GameObject *temp;
+    time = SDL_GetTicks();
     while (running) {
         while (SDL_PollEvent(&evt)) {
             if (evt.type == SDL_WINDOWEVENT) {
@@ -40,6 +43,11 @@ int main(int argc, char **argv) {
                 respond(&evt, temp);
             }
         }
+        for (int i = 0; i < objects->count; ++i) {
+            temp = get(objects, i);
+            update(SDL_GetTicks() - time, temp);
+        }
+        time = SDL_GetTicks();
         SDL_RenderClear(renderer);
         map(sprites, drawSprite);
         SDL_RenderPresent(renderer);

@@ -26,6 +26,7 @@ SDL_Renderer *renderer;
 SDL_bool running;
 vector *sprites;
 vector *objects;
+Uint32 time;
 
 int init();
 void quit();
