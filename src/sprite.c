@@ -12,15 +12,23 @@ Component *Sprite(SDL_Texture *texture, SDL_Rect src_rect, SDL_Rect dst_rect) {
     sprite->data = data;
     sprite->update = NULL;
     sprite->respond = NULL;
+    sprite->type = SPRITE;
 
-    insert(&sprites, sprite);
+    insert(sprites, sprite);
     return sprite;
 }
 
 void deleteSprite(Component *sprite) {
-    free(sprite->data);
-    free(sprite);
-    sprite = NULL;
+    if (sprite->type == SPRITE) {
+        free(sprite->data);
+        free(sprite);
+        sprite = NULL;
+    }
+    #ifdef DEBUG
+    else {
+        printf("Error: Component at %p is not a sprite\n", sprite);
+    }
+    #endif
 }
 
 void drawSprite(void *sprite) {

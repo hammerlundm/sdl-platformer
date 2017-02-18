@@ -12,8 +12,8 @@ typedef struct {
 Component *Sprite(SDL_Texture *texture, SDL_Rect src_rect, SDL_Rect dst_rect);
 void deleteSprite(Component *sprite);
 
-void updateSprite(Uint32 interval, Component *self);
-void respondsprite(SDL_Event *event, Component *self);
+void updateSprite(Uint32 interval, GameObject *self);
+void respondsprite(SDL_Event *event, GameObject *self);
 
 void drawSprite(void *sprite);
 

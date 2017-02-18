@@ -1,12 +1,18 @@
 #include "vector.h"
 #include <stdlib.h>
 
-vector newVector() {
-   return (vector) { 0, 0, 0 };
+vector *newVector() {
+    vector *v = malloc(sizeof(vector));
+    v->data = NULL;
+    v->count = 0;
+    v->_limit = 0;
+    return v;
 }
 
 void deleteVector(vector* v) {
     free(v->data);
+    free(v);
+    v = NULL;
 }
 
 void insert(vector* v, void *data) {

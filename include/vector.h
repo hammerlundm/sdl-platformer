@@ -7,7 +7,7 @@ typedef struct {
     int _limit;
 } vector;
 
-vector newVector();
+vector *newVector();
 void deleteVector(vector* v);
 
 void insert(vector* v, void *data);
