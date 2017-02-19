@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
     SDL_Rect r2 = {0, 0, 64, 64};
     Component *s1 = Sprite(texture, 4, rects, &r1, 200);
     Component *s2 = Sprite(texture, 2, rects+2, &r2, 100);
-    Component *thing = Control();
+    Component *thing = Control(0.9);
     Component *c1 = Collision(r1, SDL_TRUE);
     Component *c2 = Collision(r2, SDL_FALSE);
     GameObject *obj1 = newGameObject();
@@ -31,6 +31,7 @@ int main(int argc, char **argv) {
     insert(obj2->components, thing);
     insert(obj1->components, c1);
     insert(obj2->components, c2);
+    move(obj1, 400, 200);
     move(obj2, 100, 200);
 
     SDL_Event evt;
@@ -75,6 +76,7 @@ int init() {
     running = SDL_TRUE;
     sprites = newVector();
     objects = newVector();
+    current_controls = WASD;
     Uint32 events = SDL_RegisterEvents(2);
     #ifdef DEBUG
     if (events == (Uint32)-1) {
@@ -84,7 +86,7 @@ int init() {
     MOVEEVENT = events;
     COLLISIONEVENT = events + 1;
     window = SDL_CreateWindow("Game!", SDL_WINDOWPOS_CENTERED, 
-                              SDL_WINDOWPOS_CENTERED, 640, 480, 0);
+                              SDL_WINDOWPOS_CENTERED, 1600, 900, 0);
     if (!window) {
         #ifdef DEBUG
         printf("SDL error: %s\n", SDL_GetError());

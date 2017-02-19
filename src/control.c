@@ -2,14 +2,16 @@
 #include "game_object.h"
 #include "sprite.h"
 
-Component *Control() {
+Component *Control(float friction) {
     Component *control = malloc(sizeof(Component));
     ControlData *data = malloc(sizeof(ControlData));
 
-    data->temp = 0;
+    data->vx = 0;
+    data->vy = 0;
+    data->friction = friction;
 
     control->data = data;
-    control->update = NULL;
+    control->update = updateControl;
     control->respond =respondControl;
     control->type = CONTROL;
 
@@ -29,19 +31,55 @@ void deleteControl(Component *control) {
     #endif
 }
 
+void updateControl(Uint32 interval, GameObject *self) {
+    ControlData *data = getComponent(self, CONTROL)->data;
+    data->vx += getInput(current_controls, 1) / 10;
+    data->vy += getInput(current_controls, 0) / 10;
+    data->vx *= data->friction;
+    data->vy *= data->friction;
+    move(self, data->vx * interval, data->vy * interval);
+}
+
 void respondControl(SDL_Event *evt, GameObject *self) {
-    if (evt->type == SDL_KEYDOWN) {
-        if (evt->key.keysym.sym == SDLK_w) {
-            move(self, 0, -5);
+    if (evt->type == COLLISIONEVENT && evt->user.data1 == self) {
+        ControlData *data = getComponent(self, CONTROL)->data;
+        data->vx = 0;
+        data->vy = 0;
+    }
+    else if (evt->type == SDL_KEYDOWN) {
+        switch (evt->key.keysym.sym) {
+            case SDLK_w:
+            case SDLK_a:
+            case SDLK_s:
+            case SDLK_d:
+                current_controls = WASD;
+                break;
+            case SDLK_UP:
+            case SDLK_LEFT:
+            case SDLK_DOWN:
+            case SDLK_RIGHT:
+                current_controls = ARROWS;
+                break;
         }
-        else if (evt->key.keysym.sym == SDLK_a) {
-            move(self, -5, 0);
+    }
+}
+
+float getInput(control_t controls, SDL_bool horizontal) {
+    Uint8 *keyboard = SDL_GetKeyboardState(NULL);
+    if (controls & WASD) {
+        if (horizontal) {
+            return keyboard[SDL_SCANCODE_D] - keyboard[SDL_SCANCODE_A];
         }
-        else if (evt->key.keysym.sym == SDLK_s) {
-            move(self, 0, 5);
+        else {
+            return keyboard[SDL_SCANCODE_S] - keyboard[SDL_SCANCODE_W];
         }
-        else if (evt->key.keysym.sym == SDLK_d) {
-            move(self, 5, 0);
+    }
+    else if (controls & ARROWS) {
+        if (horizontal) {
+            return keyboard[SDL_SCANCODE_RIGHT] - keyboard[SDL_SCANCODE_LEFT];
+        }
+        else {
+            return keyboard[SDL_SCANCODE_DOWN] - keyboard[SDL_SCANCODE_UP];
         }
     }
 }
