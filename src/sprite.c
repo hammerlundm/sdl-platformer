@@ -39,8 +39,7 @@ void deleteSprite(Component *sprite) {
 }
 
 void updateSprite(Uint32 interval, GameObject *self) {
-    Component *sprite = getComponent(self, SPRITE);
-    SpriteData *data = sprite->data;
+    SpriteData *data = getComponent(self, SPRITE)->data;
     if (data->time && data->time_left <= interval) {
         data->time_left = data->time;
         data->frame++;
@@ -51,8 +50,8 @@ void updateSprite(Uint32 interval, GameObject *self) {
     data->time_left -= interval;
 }
 
-void respondSprite(SDL_Event *event, GameObject *self) {
-    if (event->type == MOVEEVENT && event->user.data1 == self) {
+void respondSprite(SDL_Event *evt, GameObject *self) {
+    if (evt->type == MOVEEVENT && evt->user.data1 == self) {
         Component *sprite = getComponent(self, SPRITE);
         SpriteData *data = sprite->data;
         data->dst_rect->x = self->x;

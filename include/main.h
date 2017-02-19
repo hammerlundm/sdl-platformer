@@ -5,9 +5,9 @@
 #include "vector.h"
 
 typedef enum {
-    NONE = 0,
     SPRITE,
     CONTROL,
+    COLLISION
 } Type;
 
 typedef struct GameObject GameObject;
@@ -21,6 +21,7 @@ typedef struct {
 
 //Global Variables
 Uint32 MOVEEVENT;
+Uint32 COLLISIONEVENT;
 SDL_Window *window;
 SDL_Renderer *renderer;
 SDL_bool running;

@@ -32,16 +32,16 @@ void deleteControl(Component *control) {
 void respondControl(SDL_Event *evt, GameObject *self) {
     if (evt->type == SDL_KEYDOWN) {
         if (evt->key.keysym.sym == SDLK_w) {
-            move(self, 0, -1);
+            move(self, 0, -5);
         }
         else if (evt->key.keysym.sym == SDLK_a) {
-            move(self, -1, 0);
+            move(self, -5, 0);
         }
         else if (evt->key.keysym.sym == SDLK_s) {
-            move(self, 0, 1);
+            move(self, 0, 5);
         }
         else if (evt->key.keysym.sym == SDLK_d) {
-            move(self, 1, 0);
+            move(self, 5, 0);
         }
     }
 }

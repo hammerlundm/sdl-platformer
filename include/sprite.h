@@ -16,7 +16,7 @@ Component *Sprite(SDL_Texture *texture, int frames, SDL_Rect *src_rects, SDL_Rec
 void deleteSprite(Component *sprite);
 
 void updateSprite(Uint32 interval, GameObject *self);
-void respondSprite(SDL_Event *event, GameObject *self);
+void respondSprite(SDL_Event *evt, GameObject *self);
 
 void drawSprite(void *sprite);
 
