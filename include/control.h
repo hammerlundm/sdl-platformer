@@ -3,6 +3,8 @@
 
 #include "main.h"
 
+static const float G = 0.005;
+
 typedef struct {
    float vy;
    float vx;

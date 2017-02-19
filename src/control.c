@@ -1,6 +1,7 @@
 #include "control.h"
 #include "game_object.h"
 #include "sprite.h"
+#include "collision.h"
 
 Component *Control(float friction) {
     Component *control = malloc(sizeof(Component));
@@ -33,8 +34,21 @@ void deleteControl(Component *control) {
 
 void updateControl(Uint32 interval, GameObject *self) {
     ControlData *data = getComponent(self, CONTROL)->data;
+    Component *collision = getComponent(self, COLLISION);
+    float y = getInput(current_controls, 0) / 10;
+    if (collision) {
+        CollisionData *cd = collision->data;
+        if (cd->collision == TOP) {
+            data->vy = y < 0 ? 20*y : 0;
+        }
+        else {
+            data->vy += G * interval;
+        }
+    }
+    else {
+        data->vy = y;
+    }
     data->vx += getInput(current_controls, 1) / 10;
-    data->vy += getInput(current_controls, 0) / 10;
     data->vx *= data->friction;
     data->vy *= data->friction;
     move(self, data->vx * interval, data->vy * interval);
@@ -43,8 +57,12 @@ void updateControl(Uint32 interval, GameObject *self) {
 void respondControl(SDL_Event *evt, GameObject *self) {
     if (evt->type == COLLISIONEVENT && evt->user.data1 == self) {
         ControlData *data = getComponent(self, CONTROL)->data;
-        data->vx = 0;
-        data->vy = 0;
+        if (evt->user.code == TOP || evt->user.code == BOTTOM) {
+            data->vy = 0;
+        }
+        else if (evt->user.code == LEFT || evt->user.code == RIGHT) {
+            data->vx = 0;
+        }
     }
     else if (evt->type == SDL_KEYDOWN) {
         switch (evt->key.keysym.sym) {
@@ -65,7 +83,7 @@ void respondControl(SDL_Event *evt, GameObject *self) {
 }
 
 float getInput(control_t controls, SDL_bool horizontal) {
-    Uint8 *keyboard = SDL_GetKeyboardState(NULL);
+    const Uint8 *keyboard = SDL_GetKeyboardState(NULL);
     if (controls & WASD) {
         if (horizontal) {
             return keyboard[SDL_SCANCODE_D] - keyboard[SDL_SCANCODE_A];
@@ -82,4 +100,5 @@ float getInput(control_t controls, SDL_bool horizontal) {
             return keyboard[SDL_SCANCODE_DOWN] - keyboard[SDL_SCANCODE_UP];
         }
     }
+    return 0;
 }

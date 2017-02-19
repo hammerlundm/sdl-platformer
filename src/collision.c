@@ -31,6 +31,7 @@ void deleteCollision(Component *collision) {
 
 void updateCollision(Uint32 interval, GameObject *self) {
     CollisionData *c1 = getComponent(self, COLLISION)->data;
+    c1->collision = NONE;
     CollisionData *c2;
     GameObject *obj;
     for (int i = 0; i < objects->count; ++i) {
@@ -46,6 +47,7 @@ void updateCollision(Uint32 interval, GameObject *self) {
                     event.user.data1 = self;
                     event.user.data2 = obj;
                     SDL_PushEvent(&event);
+                    c1->collision = collision;
                 }
             }
         }

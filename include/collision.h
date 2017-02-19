@@ -12,8 +12,9 @@ typedef enum {
 } collision_t;
 
 typedef struct {
-   SDL_Rect bounds;
-   SDL_bool fixed;
+    SDL_Rect bounds;
+    SDL_bool fixed;
+    collision_t collision;
 } CollisionData;
 
 Component *Collision(SDL_Rect bounds, SDL_bool fixed);
