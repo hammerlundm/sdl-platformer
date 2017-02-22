@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
     insert(obj3->components, c3);
     move(obj1, 400, 200);
     move(obj2, 100, 500);
-    move(obj3, 612, 438);
+    move(obj3, 612, 443);
 
     SDL_Event evt;
     GameObject *temp;
@@ -50,6 +50,12 @@ int main(int argc, char **argv) {
                 if (evt.window.event == SDL_WINDOWEVENT_CLOSE) {
                     running = SDL_FALSE;
                 }
+            }
+            else if (evt.type == SDL_KEYDOWN) {
+                keyboard = SDL_TRUE;
+            }
+            else if (evt.type == SDL_JOYBUTTONDOWN) {
+                keyboard = SDL_FALSE;
             }
             for (int i = 0; i < objects->count; ++i) {
                 temp = get(objects, i);
@@ -83,7 +89,7 @@ int init() {
     running = SDL_TRUE;
     sprites = newVector();
     objects = newVector();
-    current_controls = WASD;
+    keyboard = SDL_TRUE;
     Uint32 events = SDL_RegisterEvents(2);
     #ifdef DEBUG
     if (events == (Uint32)-1) {
@@ -92,6 +98,23 @@ int init() {
     #endif
     MOVEEVENT = events;
     COLLISIONEVENT = events + 1;
+    if (SDL_NumJoysticks() > 0) {
+        joystick = SDL_JoystickOpen(0);
+        keyboard = SDL_FALSE;
+        #ifdef DEBUG
+        if (joystick == NULL) {
+            printf("SDL error: %s\n", SDL_GetError());
+        }
+        else {
+            printf("Joystick connected\n");
+        }
+        #endif
+    }
+    #ifdef DEBUG
+    else {
+        printf("No joysticks detected\n");
+    }
+    #endif
     window = SDL_CreateWindow("Game!", SDL_WINDOWPOS_CENTERED, 
                               SDL_WINDOWPOS_CENTERED, 1600, 900, 0);
     if (!window) {
@@ -112,6 +135,9 @@ int init() {
 }
 
 void quit() {
+    if (SDL_JoystickGetAttached(joystick)) {
+        SDL_JoystickClose(joystick);
+    }
     deleteVector(sprites);
     deleteVector(objects);
     SDL_DestroyRenderer(renderer);

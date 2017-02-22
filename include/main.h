@@ -5,12 +5,6 @@
 #include "vector.h"
 
 typedef enum {
-    DEFAULT = 0,
-    WASD,
-    ARROWS 
-} control_t;
-
-typedef enum {
     SPRITE,
     CONTROL,
     COLLISION
@@ -34,7 +28,8 @@ SDL_bool running;
 vector *sprites;
 vector *objects;
 Uint32 time;
-control_t current_controls;
+SDL_bool keyboard;
+SDL_Joystick *joystick;
 
 int init();
 void quit();

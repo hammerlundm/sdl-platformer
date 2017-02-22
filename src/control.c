@@ -10,6 +10,9 @@ Component *Control(float friction) {
     data->vx = 0;
     data->vy = 0;
     data->friction = friction;
+    data->up = (control_t) {SDL_SCANCODE_W, 0, 1, 2};
+    data->left = (control_t) {SDL_SCANCODE_A, -1, 0, 9};
+    data->right = (control_t) {SDL_SCANCODE_D, 1, 0, 3};
 
     control->data = data;
     control->update = updateControl;
@@ -35,11 +38,11 @@ void deleteControl(Component *control) {
 void updateControl(Uint32 interval, GameObject *self) {
     ControlData *data = getComponent(self, CONTROL)->data;
     Component *collision = getComponent(self, COLLISION);
-    float y = getInput(current_controls, 0) / 10;
+    float y = getInput(data->up);
     if (collision) {
         CollisionData *cd = collision->data;
         if (cd->collision == TOP) {
-            data->vy = y < 0 ? 20*y : 0;
+            data->vy = -2*y;
         }
         else {
             data->vy += G * interval;
@@ -48,7 +51,7 @@ void updateControl(Uint32 interval, GameObject *self) {
     else {
         data->vy = y;
     }
-    data->vx += getInput(current_controls, 1) / 10;
+    data->vx += (getInput(data->right) - getInput(data->left)) / 10;
     data->vx *= data->friction;
     data->vy *= data->friction;
     move(self, data->vx * interval, data->vy * interval);
@@ -64,41 +67,39 @@ void respondControl(SDL_Event *evt, GameObject *self) {
             data->vx = 0;
         }
     }
-    else if (evt->type == SDL_KEYDOWN) {
-        switch (evt->key.keysym.sym) {
-            case SDLK_w:
-            case SDLK_a:
-            case SDLK_s:
-            case SDLK_d:
-                current_controls = WASD;
-                break;
-            case SDLK_UP:
-            case SDLK_LEFT:
-            case SDLK_DOWN:
-            case SDLK_RIGHT:
-                current_controls = ARROWS;
-                break;
-        }
-    }
 }
 
-float getInput(control_t controls, SDL_bool horizontal) {
-    const Uint8 *keyboard = SDL_GetKeyboardState(NULL);
-    if (controls & WASD) {
-        if (horizontal) {
-            return keyboard[SDL_SCANCODE_D] - keyboard[SDL_SCANCODE_A];
-        }
-        else {
-            return keyboard[SDL_SCANCODE_S] - keyboard[SDL_SCANCODE_W];
-        }
+float getInput(control_t controls) {
+    if (keyboard) {
+        const Uint8 *keyboard = SDL_GetKeyboardState(NULL);
+        return keyboard[controls.key];
     }
-    else if (controls & ARROWS) {
-        if (horizontal) {
-            return keyboard[SDL_SCANCODE_RIGHT] - keyboard[SDL_SCANCODE_LEFT];
+    else {
+        float val = 0;
+        if (controls.axis) {
+            Uint8 axis;
+            if (controls.axis < 0) {
+                axis = -controls.axis - 1;
+            }
+            else {
+                axis = controls.axis - 1;
+            }
+            val = SDL_JoystickGetAxis(joystick, axis) / 32768.;
+            if (val < 0 && controls.axis < 0) {
+                val = -val;
+            }
+            else if (val > 0 && controls.axis > 0) {
+            }
+            else {
+                val = 0;
+            }
         }
-        else {
-            return keyboard[SDL_SCANCODE_DOWN] - keyboard[SDL_SCANCODE_UP];
+        if (val == 0 && controls.button) {
+            val = SDL_JoystickGetButton(joystick, controls.button - 1);
         }
+        if (val == 0 && controls.hat) {
+            val = SDL_JoystickGetHat(joystick, 0) & (controls.hat - 1) ? 1 : 0;
+        }
+        return val;
     }
-    return 0;
 }
