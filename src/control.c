@@ -38,18 +38,17 @@ void deleteControl(Component *control) {
 void updateControl(Uint32 interval, GameObject *self) {
     ControlData *data = getComponent(self, CONTROL)->data;
     Component *collision = getComponent(self, COLLISION);
-    float y = getInput(data->up);
     if (collision) {
         CollisionData *cd = collision->data;
         if (cd->collision == TOP) {
-            data->vy = -2*y;
+            data->vy = -2*getInput(data->up);
         }
         else {
             data->vy += G * interval;
         }
     }
     else {
-        data->vy = y;
+        data->vy = getInput(data->up);
     }
     data->vx += (getInput(data->right) - getInput(data->left)) / 10;
     data->vx *= data->friction;

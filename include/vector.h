@@ -10,8 +10,10 @@ typedef struct {
 vector *newVector();
 void deleteVector(vector* v);
 
-void insert(vector* v, void *data);
-void *get(vector* v, int index);
+void vInsert(vector* v, void *data);
+void vRemove(vector *v, int index);
+void *vGet(vector *v, int index);
+int vFind(vector *v, void *data);
 
 void map(vector* v, void (*func)(void *data));
 

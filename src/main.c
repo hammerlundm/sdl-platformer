@@ -20,26 +20,34 @@ int main(int argc, char **argv) {
     SDL_Rect r1 = {0, 0, 128, 128};
     SDL_Rect r2 = {0, 0, 512, 64};
     SDL_Rect r3 = {0, 0, 256, 128};
+    SDL_Rect r4 = {0, 0, 1024, 256};
     Component *s1 = Sprite(texture, 4, rects, &r1, 200);
     Component *s2 = Sprite(texture, 2, rects+2, &r2, 100);
     Component *s3 = Sprite(texture, 1, rects, &r3, 0);
+    Component *s4 = Sprite(texture, 1, rects+3, &r4, 0);
     Component *thing = Control(0.9);
     Component *c1 = Collision(r1, SDL_FALSE);
     Component *c2 = Collision(r2, SDL_TRUE);
     Component *c3 = Collision(r3, SDL_TRUE);
+    Component *c4 = Collision(r4, SDL_TRUE);
     GameObject *obj1 = newGameObject();
     GameObject *obj2 = newGameObject();
     GameObject *obj3 = newGameObject();
-    insert(obj1->components, s1);
-    insert(obj2->components, s2);
-    insert(obj3->components, s3);
-    insert(obj1->components, thing);
-    insert(obj1->components, c1);
-    insert(obj2->components, c2);
-    insert(obj3->components, c3);
+    GameObject *obj4 = newGameObject();
+    vInsert(obj1->components, s1);
+    vInsert(obj2->components, s2);
+    vInsert(obj3->components, s3);
+    vInsert(obj4->components, s4);
+    vInsert(obj1->components, thing);
+    vInsert(obj1->components, c1);
+    vInsert(obj2->components, c2);
+    vInsert(obj3->components, c3);
+    vInsert(obj4->components, c4);
     move(obj1, 400, 200);
     move(obj2, 100, 500);
-    move(obj3, 612, 443);
+    move(obj3, 612, 436);
+    move(obj4, 868, 564);
+    focus = obj1;
 
     SDL_Event evt;
     GameObject *temp;
@@ -58,14 +66,16 @@ int main(int argc, char **argv) {
                 keyboard = SDL_FALSE;
             }
             for (int i = 0; i < objects->count; ++i) {
-                temp = get(objects, i);
+                temp = vGet(objects, i);
                 respond(&evt, temp);
             }
         }
         for (int i = 0; i < objects->count; ++i) {
-            temp = get(objects, i);
+            temp = vGet(objects, i);
             update(SDL_GetTicks() - time, temp);
         }
+        camera.x += (focus->x - camera.w / 2 - camera.x)*(SDL_GetTicks()-time)/500;
+        camera.y += (focus->y - camera.h / 2 - camera.y)*(SDL_GetTicks()-time)/200;
         time = SDL_GetTicks();
         SDL_RenderClear(renderer);
         map(sprites, drawSprite);
@@ -73,9 +83,17 @@ int main(int argc, char **argv) {
     }
     deleteSprite(s1);
     deleteSprite(s2);
+    deleteSprite(s3);
+    deleteSprite(s4);
     deleteControl(thing);
+    deleteCollision(c1);
+    deleteCollision(c2);
+    deleteCollision(c3);
+    deleteCollision(c4);
     deleteGameObject(obj1);
     deleteGameObject(obj2);
+    deleteGameObject(obj3);
+    deleteGameObject(obj4);
     quit();
 }
 
@@ -131,6 +149,7 @@ int init() {
         #endif
         return -1;
     }
+    camera = (SDL_Rect) {0, 0, 1600, 900};
     return 0;
 }
 

@@ -11,7 +11,7 @@ Component *Sprite(SDL_Texture *texture, int frames, SDL_Rect *src_rects, SDL_Rec
     data->time_left = time;
     data->frame = 0;
     for (int i = 0; i < frames; ++i) {
-        insert(data->src_rects, src_rects+i);
+        vInsert(data->src_rects, src_rects+i);
     }
     data->dst_rect = dst_rect;
 
@@ -20,7 +20,7 @@ Component *Sprite(SDL_Texture *texture, int frames, SDL_Rect *src_rects, SDL_Rec
     sprite->respond = respondSprite;
     sprite->type = SPRITE;
 
-    insert(sprites, sprite);
+    vInsert(sprites, sprite);
     return sprite;
 }
 
@@ -62,5 +62,11 @@ void respondSprite(SDL_Event *evt, GameObject *self) {
 void drawSprite(void *sprite) {
     Component *s = sprite;
     SpriteData *data = s->data;
-    SDL_RenderCopy(renderer, data->texture, get(data->src_rects, data->frame), data->dst_rect);
+    SDL_Rect *dst = malloc(sizeof(SDL_Rect));
+    memcpy(dst, data->dst_rect, sizeof(SDL_Rect));
+    dst->x -= camera.x;
+    dst->y -= camera.y;
+    SDL_RenderCopy(renderer, data->texture, 
+        vGet(data->src_rects, data->frame), dst);
+    free(dst);
 }

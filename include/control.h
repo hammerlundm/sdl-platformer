@@ -7,7 +7,7 @@ static const float G = 0.005;
 
 typedef struct {
     SDL_Scancode key;
-    Sint16 axis;
+    Sint8 axis;
     Uint8 button;
     Uint8 hat;
 } control_t;

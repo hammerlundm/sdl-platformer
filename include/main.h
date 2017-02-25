@@ -19,15 +19,25 @@ typedef struct {
     Type type;
 } Component;
 
+
 //Global Variables
 Uint32 MOVEEVENT;
 Uint32 COLLISIONEVENT;
+
 SDL_Window *window;
 SDL_Renderer *renderer;
+
+SDL_Rect camera;
+GameObject *focus;
+
 SDL_bool running;
+SDL_bool paused;
+
 vector *sprites;
 vector *objects;
+
 Uint32 time;
+
 SDL_bool keyboard;
 SDL_Joystick *joystick;
 

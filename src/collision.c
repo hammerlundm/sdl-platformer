@@ -7,6 +7,7 @@ Component *Collision(SDL_Rect bounds, SDL_bool fixed) {
 
     data->bounds = bounds;
     data->fixed = fixed;
+    data->collision = NONE;
 
     collision->data = data;
     collision->update = updateCollision;
@@ -32,22 +33,26 @@ void deleteCollision(Component *collision) {
 void updateCollision(Uint32 interval, GameObject *self) {
     CollisionData *c1 = getComponent(self, COLLISION)->data;
     c1->collision = NONE;
+    Component *temp;
     CollisionData *c2;
     GameObject *obj;
     for (int i = 0; i < objects->count; ++i) {
-        obj = get(objects, i);
+        obj = vGet(objects, i);
         if (obj != self) {
-            c2 = getComponent(obj, COLLISION)->data;
-            if (c2) {
-                collision_t collision = checkCollision(c1->bounds, c2->bounds);
-                if (collision) {
-                    SDL_Event event;
-                    event.type = COLLISIONEVENT;
-                    event.user.code = collision;
-                    event.user.data1 = self;
-                    event.user.data2 = obj;
-                    SDL_PushEvent(&event);
-                    c1->collision = collision;
+            temp = getComponent(obj, COLLISION);
+            if (temp) {
+                c2 = temp->data;
+                if (c2) {
+                    collision_t collision = checkCollision(c1->bounds, c2->bounds);
+                    if (collision) {
+                        SDL_Event event;
+                        event.type = COLLISIONEVENT;
+                        event.user.code = collision;
+                        event.user.data1 = self;
+                        event.user.data2 = obj;
+                        SDL_PushEvent(&event);
+                        c1->collision = collision;
+                    }
                 }
             }
         }
