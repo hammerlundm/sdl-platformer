@@ -12,6 +12,8 @@ struct GameObject {
 GameObject *newGameObject();
 void deleteGameObject(GameObject *obj);
 
+void deleteComponent(Component *c);
+
 void update(Uint32 interval, GameObject *obj);
 void respond(SDL_Event *evt, GameObject *obj);
 

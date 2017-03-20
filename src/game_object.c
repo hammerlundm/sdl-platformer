@@ -1,4 +1,7 @@
 #include "game_object.h"
+#include "sprite.h"
+#include "collision.h"
+#include "control.h"
 
 GameObject *newGameObject() {
     GameObject *obj = malloc(sizeof(GameObject));
@@ -11,9 +14,24 @@ GameObject *newGameObject() {
 }
 
 void deleteGameObject(GameObject *obj) {
+    for (int i = 0; i < obj->components->count; i++) {
+        deleteComponent(vGet(obj->components, i));
+    }
     deleteVector(obj->components);
     free(obj);
     obj = NULL;
+}
+
+void deleteComponent(Component *c) {
+    if (c->type == SPRITE) {
+        deleteSprite(c);
+    }
+    else if (c->type == COLLISION) {
+        deleteCollision(c);
+    }
+    else if (c->type == CONTROL) {
+        deleteControl(c);
+    }
 }
 
 void update(Uint32 interval, GameObject *obj) {

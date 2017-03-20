@@ -28,6 +28,7 @@ SDL_Window *window;
 SDL_Renderer *renderer;
 
 SDL_Rect camera;
+float zoom;
 GameObject *focus;
 
 SDL_bool running;

@@ -61,6 +61,12 @@ int main(int argc, char **argv) {
             }
             else if (evt.type == SDL_KEYDOWN) {
                 keyboard = SDL_TRUE;
+                if (evt.key.keysym.sym == SDLK_q) {
+                    zoom *= 1.2;
+                }
+                else if (evt.key.keysym.sym == SDLK_e) {
+                    zoom /= 1.2;
+                }
             }
             else if (evt.type == SDL_JOYBUTTONDOWN) {
                 keyboard = SDL_FALSE;
@@ -74,27 +80,19 @@ int main(int argc, char **argv) {
             temp = vGet(objects, i);
             update(SDL_GetTicks() - time, temp);
         }
-        camera.x += (focus->x - camera.w / 2 - camera.x)*(SDL_GetTicks()-time)/500;
-        camera.y += (focus->y - camera.h / 2 - camera.y)*(SDL_GetTicks()-time)/200;
+        camera.x += (focus->x - camera.w / 2 - camera.x)*zoom*(SDL_GetTicks()-time)/500;
+        camera.y += (focus->y - camera.h / 2 - camera.y)*zoom*(SDL_GetTicks()-time)/200;
         time = SDL_GetTicks();
         SDL_RenderClear(renderer);
         map(sprites, drawSprite);
         SDL_RenderPresent(renderer);
     }
-    deleteSprite(s1);
-    deleteSprite(s2);
-    deleteSprite(s3);
-    deleteSprite(s4);
-    deleteControl(thing);
-    deleteCollision(c1);
-    deleteCollision(c2);
-    deleteCollision(c3);
-    deleteCollision(c4);
     deleteGameObject(obj1);
     deleteGameObject(obj2);
     deleteGameObject(obj3);
     deleteGameObject(obj4);
     quit();
+    return 0;
 }
 
 int init() {
@@ -109,6 +107,7 @@ int init() {
     objects = newVector();
     keyboard = SDL_TRUE;
     Uint32 events = SDL_RegisterEvents(2);
+    zoom = 1.;
     #ifdef DEBUG
     if (events == (Uint32)-1) {
         printf("Error: too many event types to allocate\n");

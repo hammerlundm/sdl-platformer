@@ -64,8 +64,10 @@ void drawSprite(void *sprite) {
     SpriteData *data = s->data;
     SDL_Rect *dst = malloc(sizeof(SDL_Rect));
     memcpy(dst, data->dst_rect, sizeof(SDL_Rect));
-    dst->x -= camera.x;
-    dst->y -= camera.y;
+    dst->x = ((dst->x - camera.x - camera.w/2) * zoom) + camera.w/2;
+    dst->y = ((dst->y - camera.y - camera.h/2) * zoom) + camera.h/2;
+    dst->w *= zoom;
+    dst->h *= zoom;
     SDL_RenderCopy(renderer, data->texture, 
         vGet(data->src_rects, data->frame), dst);
     free(dst);
