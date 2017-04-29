@@ -36,7 +36,7 @@ void deleteComponent(Component *c) {
 
 void update(Uint32 interval, GameObject *obj) {
     Component *c;
-    for (int i = 0; i < obj->components->count; ++i) {
+    for (int i = 0; i < obj->components->count; i++) {
         c = vGet(obj->components, i);
         if (c->update) {
             c->update(interval, obj);
@@ -46,7 +46,7 @@ void update(Uint32 interval, GameObject *obj) {
 
 void respond(SDL_Event *evt, GameObject *obj) {
     Component *c;
-    for (int i = 0; i < obj->components->count; ++i) {
+    for (int i = 0; i < obj->components->count; i++) {
         c = vGet(obj->components, i);
         if (c->respond) {
             c->respond(evt, obj);
@@ -56,7 +56,7 @@ void respond(SDL_Event *evt, GameObject *obj) {
 
 Component *getComponent(GameObject *obj, Type t) {
     Component *c;
-    for (int i = 0; i < obj->components->count; ++i) {
+    for (int i = 0; i < obj->components->count; i++) {
         c = vGet(obj->components, i);
         if (c->type == t) {
             return c;

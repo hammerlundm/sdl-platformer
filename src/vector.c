@@ -54,7 +54,7 @@ void *vGet(vector* v, int index) {
 }
 
 int vFind(vector *v, void *data) {
-    for (int i = 0; i < v->count; ++i) {
+    for (int i = 0; i < v->count; i++) {
         if (v->data[i] == data) {
             return i;
         }
@@ -63,7 +63,7 @@ int vFind(vector *v, void *data) {
 }
 
 void map(vector* v, void (*func)(void *data)) {
-    for (int i = 0; i < v->count; ++i) {
+    for (int i = 0; i < v->count; i++) {
         func(v->data[i]);
     }
 }

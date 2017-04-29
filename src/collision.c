@@ -19,9 +19,9 @@ Component *Collision(SDL_Rect bounds, SDL_bool fixed) {
 
 void deleteCollision(Component *collision) {
     if (collision->type == COLLISION) {
-       free(collision->data);
-       free(collision);
-       collision = NULL;
+        free(collision->data);
+        free(collision);
+        collision = NULL;
     }
     #ifdef DEBUG
     else {
@@ -36,7 +36,7 @@ void updateCollision(Uint32 interval, GameObject *self) {
     Component *temp;
     CollisionData *c2;
     GameObject *obj;
-    for (int i = 0; i < objects->count; ++i) {
+    for (int i = 0; i < objects->count; i++) {
         obj = vGet(objects, i);
         if (obj != self) {
             temp = getComponent(obj, COLLISION);

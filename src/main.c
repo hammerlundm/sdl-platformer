@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
     Component *s2 = Sprite(texture, 2, rects+2, &r2, 100);
     Component *s3 = Sprite(texture, 1, rects, &r3, 0);
     Component *s4 = Sprite(texture, 1, rects+3, &r4, 0);
-    Component *thing = Control(0.9);
+    Component *thing = Control(250);
     Component *c1 = Collision(r1, SDL_FALSE);
     Component *c2 = Collision(r2, SDL_TRUE);
     Component *c3 = Collision(r3, SDL_TRUE);
@@ -71,12 +71,12 @@ int main(int argc, char **argv) {
             else if (evt.type == SDL_JOYBUTTONDOWN) {
                 keyboard = SDL_FALSE;
             }
-            for (int i = 0; i < objects->count; ++i) {
+            for (int i = 0; i < objects->count; i++) {
                 temp = vGet(objects, i);
                 respond(&evt, temp);
             }
         }
-        for (int i = 0; i < objects->count; ++i) {
+        for (int i = 0; i < objects->count; i++) {
             temp = vGet(objects, i);
             update(SDL_GetTicks() - time, temp);
         }
@@ -84,13 +84,15 @@ int main(int argc, char **argv) {
         camera.y += (focus->y - camera.h / 2 - camera.y)*zoom*(SDL_GetTicks()-time)/200;
         time = SDL_GetTicks();
         SDL_RenderClear(renderer);
-        map(sprites, drawSprite);
+        for (int i = 0; i < objects->count; i++) {
+            drawSprite(vGet(sprites, i));
+        }
         SDL_RenderPresent(renderer);
     }
-    deleteGameObject(obj1);
-    deleteGameObject(obj2);
-    deleteGameObject(obj3);
-    deleteGameObject(obj4);
+    for (int i = objects->count - 1; i >= 0; i--) {
+        deleteGameObject(vGet(objects, i));
+        vRemove(objects, i);
+    }
     quit();
     return 0;
 }
@@ -132,7 +134,7 @@ int init() {
         printf("No joysticks detected\n");
     }
     #endif
-    window = SDL_CreateWindow("Game!", SDL_WINDOWPOS_CENTERED, 
+    window = SDL_CreateWindow("Game!", SDL_WINDOWPOS_CENTERED,
                               SDL_WINDOWPOS_CENTERED, 1600, 900, 0);
     if (!window) {
         #ifdef DEBUG
@@ -140,7 +142,7 @@ int init() {
         #endif
         return -1;
     }
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | 
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED |
                                   SDL_RENDERER_PRESENTVSYNC);
     if (!renderer) {
         #ifdef DEBUG

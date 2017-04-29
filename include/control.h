@@ -3,7 +3,7 @@
 
 #include "main.h"
 
-static const float G = 0.005;
+const static float G = 0.005;
 
 typedef struct {
     SDL_Scancode key;
@@ -15,13 +15,13 @@ typedef struct {
 typedef struct {
    float vy;
    float vx;
-   float friction;
+   Uint32 friction;
    control_t up;
    control_t left;
    control_t right;
 } ControlData;
 
-Component *Control(float friction);
+Component *Control(Uint32 friction);
 void deleteControl(Component *control);
 
 void updateControl(Uint32 interval, GameObject *self);

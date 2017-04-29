@@ -2,8 +2,9 @@
 #include "game_object.h"
 #include "sprite.h"
 #include "collision.h"
+#include "math.h"
 
-Component *Control(float friction) {
+Component *Control(Uint32 friction) {
     Component *control = malloc(sizeof(Component));
     ControlData *data = malloc(sizeof(ControlData));
 
@@ -51,8 +52,8 @@ void updateControl(Uint32 interval, GameObject *self) {
         data->vy = getInput(data->up);
     }
     data->vx += (getInput(data->right) - getInput(data->left)) / 10;
-    data->vx *= data->friction;
-    data->vy *= data->friction;
+    data->vx *= pow(0.5, (float) interval / data->friction);
+    data->vy *= pow(0.5, (float) interval / data->friction);
     move(self, data->vx * interval, data->vy * interval);
 }
 

@@ -10,7 +10,7 @@ Component *Sprite(SDL_Texture *texture, int frames, SDL_Rect *src_rects, SDL_Rec
     data->time = time;
     data->time_left = time;
     data->frame = 0;
-    for (int i = 0; i < frames; ++i) {
+    for (int i = 0; i < frames; i++) {
         vInsert(data->src_rects, src_rects+i);
     }
     data->dst_rect = dst_rect;
@@ -68,7 +68,7 @@ void drawSprite(void *sprite) {
     dst->y = ((dst->y - camera.y - camera.h/2) * zoom) + camera.h/2;
     dst->w *= zoom;
     dst->h *= zoom;
-    SDL_RenderCopy(renderer, data->texture, 
+    SDL_RenderCopy(renderer, data->texture,
         vGet(data->src_rects, data->frame), dst);
     free(dst);
 }
