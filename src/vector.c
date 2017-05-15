@@ -34,6 +34,11 @@ void vRemove(vector *v, int index) {
         v->data[index] = v->data[v->count];
         v->data[v->count] = NULL;
     }
+    else if (index < 0 && index <= -v->count) {
+        v->count -= 1;
+        v->data[v->count - index] = v->data[v->count];
+        v->data[v->count] = NULL;
+    }
     #ifdef DEBUG
     else {
         printf("Error: index %d of %p is out of bounds", index, v);
@@ -45,12 +50,22 @@ void *vGet(vector* v, int index) {
     if (index >= 0 && index < v->count) {
         return v->data[index];
     }
+    else if (index < 0 && index <= -v->count) {
+        return v->data[v->count - index];
+    }
     #ifdef DEBUG
     else {
         printf("Error: index %d of %p is out of bounds", index, v);
     }
     #endif
     return NULL;
+}
+
+void *vPop(vector *v) {
+    v->count--;
+    void *data = v->data[v->count];
+    v->data[v->count] = NULL;
+    return data;
 }
 
 int vFind(vector *v, void *data) {
@@ -60,10 +75,4 @@ int vFind(vector *v, void *data) {
         }
     }
     return -1;
-}
-
-void map(vector* v, void (*func)(void *data)) {
-    for (int i = 0; i < v->count; i++) {
-        func(v->data[i]);
-    }
 }
