@@ -1,7 +1,7 @@
 EXEC = Game
 CFLAGS = -Wall -Iinclude
 CC = gcc $(CFLAGS)
-LIBS = -lSDL2main -lSDL2 -lSDL2_image -lm
+LIBS = -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -lm
 SOURCES = $(wildcard src/*.c)
 HEADERS = $(SOURCES:src/%.c=include/%.h)
 OBJECTS = $(SOURCES:src/%.c=%.o)

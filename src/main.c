@@ -9,6 +9,14 @@
 #include <stdio.h>
 #endif
 
+void stop() {
+    running = SDL_FALSE;
+}
+
+void resume() {
+    paused = SDL_FALSE;
+}
+
 int main(int argc, char **argv) {
     if (init()) {
         quit();
@@ -49,6 +57,17 @@ int main(int argc, char **argv) {
     move(obj4, 868, 564);
     focus = obj1;
 
+    SDL_Color bg = {32, 32, 32, 128};
+    SDL_Color fg = {255, 255, 255, 255};
+    SDL_Color bg1 = {128, 32, 32, 32};
+    SDL_Color clear = {0, 0, 0, 0};
+    UI_Element *pause = UI_NewLayout(&bg, &fg, NULL, UI_VERT, 50);
+    UI_NewEmpty(&clear, &clear, pause);
+    UI_Element *middle = UI_NewLayout(&clear, &fg, pause, UI_HORIZ, 20);
+    UI_NewEmpty(&clear, &clear, pause);
+    UI_NewButton(&bg1, &fg, middle, UI_RenderLines("Quit", &fg), stop)->scale = UI_KEEP;
+    UI_NewButton(&bg1, &fg, middle, UI_RenderLines("Resume", &fg), resume)->scale = UI_KEEP;
+
     SDL_Event evt;
     GameObject *temp;
     time = SDL_GetTicks();
@@ -67,18 +86,32 @@ int main(int argc, char **argv) {
                 else if (evt.key.keysym.sym == SDLK_e) {
                     zoom /= 1.2;
                 }
+                else if (evt.key.keysym.sym == SDLK_ESCAPE) {
+                    paused = !paused;
+                }
             }
             else if (evt.type == SDL_JOYBUTTONDOWN) {
                 keyboard = SDL_FALSE;
             }
-            for (int i = 0; i < objects->count; i++) {
-                temp = vGet(objects, i);
-                respond(&evt, temp);
+            if (paused) {
+                UI_Respond(pause, &evt);
+            }
+            else {
+                for (int i = 0; i < objects->count; i++) {
+                    temp = vGet(objects, i);
+                    respond(&evt, temp);
+                }
             }
         }
-        for (int i = 0; i < objects->count; i++) {
-            temp = vGet(objects, i);
-            update(SDL_GetTicks() - time, temp);
+        if (paused) {
+            Uint32 t = SDL_GetTicks() - time;
+            UI_Update(pause, &t);
+        }
+        else {
+            for (int i = 0; i < objects->count; i++) {
+                temp = vGet(objects, i);
+                update(SDL_GetTicks() - time, temp);
+            }
         }
         camera.x += (focus->x - camera.w / 2 - camera.x)*zoom*(SDL_GetTicks()-time)/500;
         camera.y += (focus->y - camera.h / 2 - camera.y)*zoom*(SDL_GetTicks()-time)/200;
@@ -87,12 +120,16 @@ int main(int argc, char **argv) {
         for (int i = 0; i < objects->count; i++) {
             drawSprite(vGet(sprites, i));
         }
+        if (paused) {
+            UI_Draw(pause);
+        }
         SDL_RenderPresent(renderer);
     }
     for (int i = objects->count - 1; i >= 0; i--) {
         deleteGameObject(vGet(objects, i));
         vRemove(objects, i);
     }
+    UI_FreeElement(pause);
     quit();
     return 0;
 }
@@ -104,6 +141,7 @@ int init() {
         #endif
         return -1;
     }
+    TTF_Init();
     running = SDL_TRUE;
     sprites = newVector();
     objects = newVector();
@@ -150,6 +188,7 @@ int init() {
         #endif
         return -1;
     }
+    UI_Init(renderer, TTF_OpenFont("font.ttf", 72), NULL);
     camera = (SDL_Rect) {0, 0, 1600, 900};
     return 0;
 }
@@ -162,5 +201,7 @@ void quit() {
     deleteVector(objects);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    UI_Quit();
+    TTF_Quit();
     SDL_Quit();
 }
