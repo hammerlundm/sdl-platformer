@@ -29,11 +29,30 @@ int main(int argc, char **argv) {
     SDL_Rect r2 = {0, 0, 512, 64};
     SDL_Rect r3 = {0, 0, 256, 128};
     SDL_Rect r4 = {0, 0, 1024, 256};
+    int w, h;
+    SDL_GetRendererOutputSize(renderer, &w, &h);
+    SDL_Rect left_rect = {0, h/3, w/3, h/3};
+    SDL_Rect right_rect = {2*w/3, h/3, w/3, h/3};
+    SDL_Rect up_rect = {w/3, 0, w/3, h/3};
+    SDL_Scancode key_w = SDL_SCANCODE_W;
+    SDL_Scancode key_a = SDL_SCANCODE_A;
+    SDL_Scancode key_d = SDL_SCANCODE_D;
+    Uint8 jump_btn = 0;
+    Uint8 up = SDL_HAT_UP;
+    Uint8 left = SDL_HAT_LEFT;
+    Uint8 right = SDL_HAT_RIGHT;
+    Uint8 horiz = 0;
+    controller_t up_controller = {&jump_btn, &up, NULL, NULL};
+    controller_t left_controller = {NULL, &left, NULL, &horiz};
+    controller_t right_controller = {NULL, &right, &horiz, NULL};
+    control_t up_control = {&key_w, &up_controller, &up_rect};
+    control_t left_control = {&key_a, &left_controller, &left_rect};
+    control_t right_control = {&key_d, &right_controller, &right_rect};
     Component *s1 = Sprite(texture, 4, rects, &r1, 200);
     Component *s2 = Sprite(texture, 2, rects+2, &r2, 100);
     Component *s3 = Sprite(texture, 1, rects, &r3, 0);
     Component *s4 = Sprite(texture, 1, rects+3, &r4, 0);
-    Component *thing = Control(250);
+    Component *thing = Control(250, &up_control, &left_control, &right_control);
     Component *c1 = Collision(r1, SDL_FALSE);
     Component *c2 = Collision(r2, SDL_TRUE);
     Component *c3 = Collision(r3, SDL_TRUE);
@@ -68,6 +87,11 @@ int main(int argc, char **argv) {
     UI_NewButton(&bg1, &fg, middle, UI_RenderLines("Quit", &fg), stop)->scale = UI_KEEP;
     UI_NewButton(&bg1, &fg, middle, UI_RenderLines("Resume", &fg), resume)->scale = UI_KEEP;
 
+    Uint8 pause_btn = 9;
+    SDL_Scancode key_pause = SDL_SCANCODE_ESCAPE;
+    controller_t pause_controller = {&pause_btn, NULL, NULL, NULL};
+    control_t pause_control = {&key_pause, &pause_controller, NULL};
+
     SDL_Event evt;
     GameObject *temp;
     time = SDL_GetTicks();
@@ -79,19 +103,15 @@ int main(int argc, char **argv) {
                 }
             }
             else if (evt.type == SDL_KEYDOWN) {
-                keyboard = SDL_TRUE;
                 if (evt.key.keysym.sym == SDLK_q) {
                     zoom *= 1.2;
                 }
                 else if (evt.key.keysym.sym == SDLK_e) {
                     zoom /= 1.2;
                 }
-                else if (evt.key.keysym.sym == SDLK_ESCAPE) {
-                    paused = !paused;
-                }
             }
-            else if (evt.type == SDL_JOYBUTTONDOWN) {
-                keyboard = SDL_FALSE;
+            if (checkInputEvent(&evt, &pause_control)) {
+                paused = !paused;
             }
             if (paused) {
                 UI_Respond(pause, &evt);
@@ -145,9 +165,9 @@ int init() {
     running = SDL_TRUE;
     sprites = newVector();
     objects = newVector();
-    keyboard = SDL_TRUE;
     Uint32 events = SDL_RegisterEvents(2);
     zoom = 1.;
+    touch = SDL_GetTouchDevice(0);
     #ifdef DEBUG
     if (events == (Uint32)-1) {
         printf("Error: too many event types to allocate\n");
@@ -157,7 +177,6 @@ int init() {
     COLLISIONEVENT = events + 1;
     if (SDL_NumJoysticks() > 0) {
         joystick = SDL_JoystickOpen(0);
-        keyboard = SDL_FALSE;
         #ifdef DEBUG
         if (joystick == NULL) {
             printf("SDL error: %s\n", SDL_GetError());

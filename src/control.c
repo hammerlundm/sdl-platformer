@@ -4,16 +4,16 @@
 #include "collision.h"
 #include "math.h"
 
-Component *Control(Uint32 friction) {
+Component *Control(Uint32 friction, control_t *up, control_t *left, control_t *right) {
     Component *control = malloc(sizeof(Component));
     ControlData *data = malloc(sizeof(ControlData));
 
     data->vx = 0;
     data->vy = 0;
     data->friction = friction;
-    data->up = (control_t) {SDL_SCANCODE_W, 0, 1, 2};
-    data->left = (control_t) {SDL_SCANCODE_A, -1, 0, 9};
-    data->right = (control_t) {SDL_SCANCODE_D, 1, 0, 3};
+    data->up = up;
+    data->left = left;
+    data->right = right;
 
     control->data = data;
     control->update = updateControl;
@@ -69,37 +69,60 @@ void respondControl(SDL_Event *evt, GameObject *self) {
     }
 }
 
-float getInput(control_t controls) {
-    if (keyboard) {
-        const Uint8 *keyboard = SDL_GetKeyboardState(NULL);
-        return keyboard[controls.key];
+float getInput(control_t *controls) {
+    SDL_Finger *finger = SDL_GetTouchFinger(touch, 0);
+    float val = 0.;
+    if (joystick && controls->controller) {
+        if (controls->controller->button) {
+            val = SDL_JoystickGetButton(joystick, *controls->controller->button);
+        }
+        if (val == 0. && controls->controller->hat) {
+            val = SDL_JoystickGetHat(joystick, 0) & (*controls->controller->hat) ? 1. : 0.;
+        }
+        if (val == 0. && controls->controller->pos_axis) {
+            float x = SDL_JoystickGetAxis(joystick, *controls->controller->pos_axis) / 32768.;
+            if (x > 0) val = x;
+        }
+        if (val == 0. && controls->controller->neg_axis) {
+            float x = SDL_JoystickGetAxis(joystick, *controls->controller->neg_axis) / 32768.;
+            if (x < 0) val = -x;
+        }
     }
-    else {
-        float val = 0;
-        if (controls.axis) {
-            Uint8 axis;
-            if (controls.axis < 0) {
-                axis = -controls.axis - 1;
-            }
-            else {
-                axis = controls.axis - 1;
-            }
-            val = SDL_JoystickGetAxis(joystick, axis) / 32768.;
-            if (val < 0 && controls.axis < 0) {
-                val = -val;
-            }
-            else if (val > 0 && controls.axis > 0) {
-            }
-            else {
-                val = 0;
-            }
+    if (val == 0. && controls->touch && finger) {
+        SDL_Rect r = (SDL_Rect) {finger->x, finger->y, 0, 0};
+        if (checkCollision(*controls->touch, r)) {
+            val = finger->pressure;
         }
-        if (val == 0 && controls.button) {
-            val = SDL_JoystickGetButton(joystick, controls.button - 1);
-        }
-        if (val == 0 && controls.hat) {
-            val = SDL_JoystickGetHat(joystick, 0) & (controls.hat - 1) ? 1 : 0;
-        }
-        return val;
     }
+    if (val == 0. && controls->key) {
+        val = SDL_GetKeyboardState(NULL)[*controls->key];
+    }
+    return val;
+}
+
+SDL_bool checkInputEvent(SDL_Event *evt, control_t *controls) {
+    if (controls->controller) {
+        if (evt->type == SDL_JOYBUTTONDOWN && controls->controller->button) {
+            return evt->jbutton.button == *controls->controller->button;
+        }
+        else if (evt->type == SDL_JOYHATMOTION && controls->controller->hat) {
+            return evt->jhat.hat == *controls->controller->hat;
+        }
+        else if (evt->type == SDL_JOYAXISMOTION) {
+            if (evt->jaxis.value / 32768. > 0.1 && controls->controller->pos_axis) {
+                return evt->jaxis.axis == *controls->controller->pos_axis;
+            }
+            else if (evt->jaxis.value / 32768. < 0.1 && controls->controller->neg_axis) {
+                return evt->jaxis.axis == *controls->controller->neg_axis;
+            }
+        }
+    }
+    if (evt->type == SDL_KEYDOWN && controls->key) {
+        return evt->key.keysym.scancode == *controls->key;
+    }
+    else if (evt->type == SDL_FINGERUP && controls->touch) {
+        SDL_Rect finger = {evt->tfinger.x, evt->tfinger.y, 0, 0};
+        return checkCollision(*controls->touch, finger);
+    }
+    return SDL_FALSE;
 }

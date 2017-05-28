@@ -40,7 +40,7 @@ vector *objects;
 
 Uint32 time;
 
-SDL_bool keyboard;
+SDL_TouchID touch;
 SDL_Joystick *joystick;
 
 int init();
