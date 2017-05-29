@@ -1,4 +1,6 @@
 *.o
+*.wo
 gmon.out
 *.swp
 Game
+Game.exe
