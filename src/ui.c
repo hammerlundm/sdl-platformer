@@ -1,4 +1,5 @@
 #include "ui.h"
+#include "control.h"
 
 SDL_Texture *UI_RenderLines(const char *message, SDL_Color *c) {
     int len = strlen(message);
@@ -279,66 +280,59 @@ void UI_Respond(UI_Element *root, SDL_Event *evt) {
 void UI_RespondElement(UI_Element *e, SDL_Rect *rect, SDL_Event *evt) {
     if (e->type == UI_BUTTON) {
         UI_Button *button = e->element;
-        if (evt->type == SDL_MOUSEBUTTONDOWN && e == UI_Focus) {
+        UI_Select.touch = rect;
+        if (e == UI_Focus && checkInputEvent(evt, &UI_Select)) {
             button->onClick();
         }
-        else if (evt->type == SDL_KEYDOWN &&
-            evt->key.keysym.sym == SDLK_RETURN && e == UI_Focus) {
-            button->onClick();
-        }
-        else if (evt->type == SDL_FINGERUP && e == UI_Focus) {
-            button->onClick();
-        }
+        UI_Select.touch = NULL;
     }
     else if (e->type == UI_LAYOUT) {
         UI_MapLayout(e->element, rect, UI_RespondElement, evt);
     }
     if (e->type != UI_LAYOUT) {
-        if (evt->type == SDL_KEYDOWN) {
-            Uint32 key = evt->key.keysym.sym;
-            if (e->parent && e == UI_Focus && (key == SDLK_UP ||
-                key == SDLK_RIGHT || key == SDLK_DOWN || key == SDLK_LEFT)) {
-                UI_Element *top = e->parent;
-                UI_Layout *l = top->element;
-                UI_Element *u = e;
-                while (((key == SDLK_UP || key == SDLK_DOWN) && l->type == UI_HORIZ) ||
-                    ((key == SDLK_LEFT || key == SDLK_RIGHT) && l->type == UI_VERT)) {
-                    u = top;
-                    top = top->parent;
-                    if (top) {
-                        l = top->element;
-                    }
-                    else {
-                        l = NULL;
-                        break;
-                    }
+        SDL_bool left = checkInputEvent(evt, &UI_Left);
+        SDL_bool right = checkInputEvent(evt, &UI_Right);
+        SDL_bool up = checkInputEvent(evt, &UI_Up);
+        SDL_bool down = checkInputEvent(evt, &UI_Down);
+        if (e->parent && e == UI_Focus && (left || right || up || down)) {
+            UI_Element *top = e->parent;
+            UI_Layout *l = top->element;
+            UI_Element *bottom = e;
+            while ((up || down) && l->type == UI_HORIZ || (left || right) && l->type == UI_VERT) {
+                bottom = top;
+                top = top->parent;
+                if (top) {
+                    l = top->element;
                 }
-                if (l) {
-                    int diff = 0;
-                    if (evt->key.keysym.sym == SDLK_UP || evt->key.keysym.sym == SDLK_LEFT) {
-                        diff = -1;
-                    }
-                    else if (evt->key.keysym.sym == SDLK_DOWN || evt->key.keysym.sym == SDLK_RIGHT) {
-                        diff = 1;
-                    }
-                    int index = vFind(l->elements, u);
-                    int temp = index;
-                    index = (index + diff) % l->elements->count;
-                    if (index < 0) index += l->elements->count;
-                    UI_Element *thing = vGet(l->elements, index);
-                    while (thing->type == UI_EMPTY && index != temp) {
-                        index = (index + diff) % l->elements->count;
-                        if (index < 0) index += l->elements->count;
-                        thing = vGet(l->elements, index);
-                    }
-                    while (thing->type == UI_LAYOUT) {
-                        l = thing->element;
-                        thing = vGet(l->elements, 0);
-                    }
-                    evt->type = 0; //TODO: fix this
-                    UI_Focus = thing;
+                else {
+                    l = NULL;
+                    break;
                 }
             }
+            if (l) {
+                int diff = 0;
+                if (up || left) diff = -1;
+                else if (down || right) diff = 1;
+                int index = vFind(l->elements, bottom);
+                int temp = index;
+                index = (index + diff) % l->elements->count;
+                if (index < 0) index += l->elements->count;
+                UI_Element *thing = vGet(l->elements, index);
+                while (thing->type == UI_EMPTY && index != temp) {
+                    index = (index + diff) % l->elements->count;
+                    if (index < 0) index += l->elements->count;
+                    thing = vGet(l->elements, index);
+                }
+                while (thing->type == UI_LAYOUT) {
+                    l = thing->element;
+                    thing = vGet(l->elements, 0);
+                }
+                evt->type = 0; //TODO: fix this
+                UI_Focus = thing;
+            }
+        }
+        if (evt->type == SDL_KEYDOWN) {
+            SDL_Keycode key = evt->key.keysym.sym;
             if (e == UI_Focus && e->type == UI_TEXTBOX) {
                 UI_TextBox *box = e->element;
                 if (box->editable) {
@@ -398,6 +392,21 @@ void UI_Init(SDL_Renderer *renderer, TTF_Font *font, SDL_Color *focus) {
     UI_Font = font;
     UI_Focus = NULL;
     UI_FocusColor = malloc(sizeof(SDL_Color));
+    controller_t *controller_select = malloc(sizeof(controller_t));
+    controller_t *controller_left = malloc(sizeof(controller_t));
+    controller_t *controller_right = malloc(sizeof(controller_t));
+    controller_t *controller_up = malloc(sizeof(controller_t));
+    controller_t *controller_down = malloc(sizeof(controller_t));
+    *controller_select = (controller_t) {0, -1, -1, -1};
+    *controller_left = (controller_t) {-1, SDL_HAT_LEFT, -1, -1};
+    *controller_right = (controller_t) {-1, SDL_HAT_RIGHT, -1, -1};
+    *controller_up = (controller_t) {-1, SDL_HAT_UP, -1, -1};
+    *controller_down = (controller_t) {-1, SDL_HAT_DOWN, -1, -1};
+    UI_Select = (control_t) {SDL_SCANCODE_RETURN, controller_select, NULL};
+    UI_Left = (control_t) {SDL_SCANCODE_LEFT, controller_left, NULL};
+    UI_Right = (control_t) {SDL_SCANCODE_RIGHT, controller_right, NULL};
+    UI_Up = (control_t) {SDL_SCANCODE_UP, controller_up, NULL};
+    UI_Down = (control_t) {SDL_SCANCODE_DOWN, controller_down, NULL};
     if (focus) {
         memcpy(UI_FocusColor, focus, sizeof(SDL_Color));
     }
@@ -411,4 +420,9 @@ void UI_Init(SDL_Renderer *renderer, TTF_Font *font, SDL_Color *focus) {
 void UI_Quit() {
     SDL_StopTextInput();
     free(UI_FocusColor);
+    free(UI_Select.controller);
+    free(UI_Left.controller);
+    free(UI_Right.controller);
+    free(UI_Up.controller);
+    free(UI_Down.controller);
 }

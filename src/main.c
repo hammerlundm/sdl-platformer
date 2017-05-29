@@ -4,6 +4,7 @@
 #include "game_object.h"
 #include "control.h"
 #include "collision.h"
+#include "ui.h"
 
 #ifdef DEBUG
 #include <stdio.h>
@@ -34,20 +35,12 @@ int main(int argc, char **argv) {
     SDL_Rect left_rect = {0, h/3, w/3, h/3};
     SDL_Rect right_rect = {2*w/3, h/3, w/3, h/3};
     SDL_Rect up_rect = {w/3, 0, w/3, h/3};
-    SDL_Scancode key_w = SDL_SCANCODE_W;
-    SDL_Scancode key_a = SDL_SCANCODE_A;
-    SDL_Scancode key_d = SDL_SCANCODE_D;
-    Uint8 jump_btn = 0;
-    Uint8 up = SDL_HAT_UP;
-    Uint8 left = SDL_HAT_LEFT;
-    Uint8 right = SDL_HAT_RIGHT;
-    Uint8 horiz = 0;
-    controller_t up_controller = {&jump_btn, &up, NULL, NULL};
-    controller_t left_controller = {NULL, &left, NULL, &horiz};
-    controller_t right_controller = {NULL, &right, &horiz, NULL};
-    control_t up_control = {&key_w, &up_controller, &up_rect};
-    control_t left_control = {&key_a, &left_controller, &left_rect};
-    control_t right_control = {&key_d, &right_controller, &right_rect};
+    controller_t up_controller = {0, SDL_HAT_UP, -1, -1};
+    controller_t left_controller = {-1, SDL_HAT_LEFT, -1, 0};
+    controller_t right_controller = {-1, SDL_HAT_RIGHT, 0, -1};
+    control_t up_control = {SDL_SCANCODE_W, &up_controller, &up_rect};
+    control_t left_control = {SDL_SCANCODE_A, &left_controller, &left_rect};
+    control_t right_control = {SDL_SCANCODE_D, &right_controller, &right_rect};
     Component *s1 = Sprite(texture, 4, rects, &r1, 200);
     Component *s2 = Sprite(texture, 2, rects+2, &r2, 100);
     Component *s3 = Sprite(texture, 1, rects, &r3, 0);
@@ -87,10 +80,8 @@ int main(int argc, char **argv) {
     UI_NewButton(&bg1, &fg, middle, UI_RenderLines("Quit", &fg), stop)->scale = UI_KEEP;
     UI_NewButton(&bg1, &fg, middle, UI_RenderLines("Resume", &fg), resume)->scale = UI_KEEP;
 
-    Uint8 pause_btn = 9;
-    SDL_Scancode key_pause = SDL_SCANCODE_ESCAPE;
-    controller_t pause_controller = {&pause_btn, NULL, NULL, NULL};
-    control_t pause_control = {&key_pause, &pause_controller, NULL};
+    controller_t pause_controller = {9, -1, -1, -1};
+    control_t pause_control = {SDL_SCANCODE_ESCAPE, &pause_controller, NULL};
 
     SDL_Event evt;
     GameObject *temp;

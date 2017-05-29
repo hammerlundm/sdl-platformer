@@ -3,7 +3,6 @@
 
 #include "SDL2/SDL.h"
 #include "vector.h"
-#include "ui.h"
 
 typedef enum {
     SPRITE,

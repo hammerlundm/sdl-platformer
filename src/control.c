@@ -73,18 +73,18 @@ float getInput(control_t *controls) {
     SDL_Finger *finger = SDL_GetTouchFinger(touch, 0);
     float val = 0.;
     if (joystick && controls->controller) {
-        if (controls->controller->button) {
-            val = SDL_JoystickGetButton(joystick, *controls->controller->button);
+        if (controls->controller->button >= 0) {
+            val = SDL_JoystickGetButton(joystick, controls->controller->button);
         }
-        if (val == 0. && controls->controller->hat) {
-            val = SDL_JoystickGetHat(joystick, 0) & (*controls->controller->hat) ? 1. : 0.;
+        if (val == 0. && controls->controller->hat >= 0) {
+            val = SDL_JoystickGetHat(joystick, 0) & (controls->controller->hat) ? 1. : 0.;
         }
-        if (val == 0. && controls->controller->pos_axis) {
-            float x = SDL_JoystickGetAxis(joystick, *controls->controller->pos_axis) / 32768.;
+        if (val == 0. && controls->controller->pos_axis >= 0) {
+            float x = SDL_JoystickGetAxis(joystick, controls->controller->pos_axis) / 32768.;
             if (x > 0) val = x;
         }
-        if (val == 0. && controls->controller->neg_axis) {
-            float x = SDL_JoystickGetAxis(joystick, *controls->controller->neg_axis) / 32768.;
+        if (val == 0. && controls->controller->neg_axis >= 0) {
+            float x = SDL_JoystickGetAxis(joystick, controls->controller->neg_axis) / 32768.;
             if (x < 0) val = -x;
         }
     }
@@ -94,35 +94,39 @@ float getInput(control_t *controls) {
             val = finger->pressure;
         }
     }
-    if (val == 0. && controls->key) {
-        val = SDL_GetKeyboardState(NULL)[*controls->key];
+    if (val == 0. && controls->key != SDL_SCANCODE_UNKNOWN) {
+        val = SDL_GetKeyboardState(NULL)[controls->key];
     }
     return val;
 }
 
 SDL_bool checkInputEvent(SDL_Event *evt, control_t *controls) {
     if (controls->controller) {
-        if (evt->type == SDL_JOYBUTTONDOWN && controls->controller->button) {
-            return evt->jbutton.button == *controls->controller->button;
+        if (evt->type == SDL_JOYBUTTONDOWN && controls->controller->button >= 0) {
+            return evt->jbutton.button == controls->controller->button;
         }
-        else if (evt->type == SDL_JOYHATMOTION && controls->controller->hat) {
-            return evt->jhat.hat == *controls->controller->hat;
+        else if (evt->type == SDL_JOYHATMOTION && controls->controller->hat >= 0) {
+            return evt->jhat.value == controls->controller->hat;
         }
         else if (evt->type == SDL_JOYAXISMOTION) {
-            if (evt->jaxis.value / 32768. > 0.1 && controls->controller->pos_axis) {
-                return evt->jaxis.axis == *controls->controller->pos_axis;
+            if (evt->jaxis.value / 32768. > 0.1 && controls->controller->pos_axis >= 0) {
+                return evt->jaxis.axis == controls->controller->pos_axis;
             }
-            else if (evt->jaxis.value / 32768. < 0.1 && controls->controller->neg_axis) {
-                return evt->jaxis.axis == *controls->controller->neg_axis;
+            else if (evt->jaxis.value / 32768. < 0.1 && controls->controller->neg_axis >= 0) {
+                return evt->jaxis.axis == controls->controller->neg_axis;
             }
         }
     }
-    if (evt->type == SDL_KEYDOWN && controls->key) {
-        return evt->key.keysym.scancode == *controls->key;
+    if (evt->type == SDL_KEYDOWN && controls->key != SDL_SCANCODE_UNKNOWN) {
+        return evt->key.keysym.scancode == controls->key;
     }
     else if (evt->type == SDL_FINGERUP && controls->touch) {
         SDL_Rect finger = {evt->tfinger.x, evt->tfinger.y, 0, 0};
         return checkCollision(*controls->touch, finger);
+    }
+    else if (evt->type == SDL_MOUSEBUTTONDOWN && controls->touch) {
+        SDL_Rect mouse = {evt->button.x, evt->button.y, 0, 0};
+        return checkCollision(*controls->touch, mouse);
     }
     return SDL_FALSE;
 }

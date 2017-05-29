@@ -2,6 +2,7 @@
 #define UI_H
 
 #include "vector.h"
+#include "control.h"
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_ttf.h"
 #include "SDL2/SDL_image.h"
@@ -99,5 +100,10 @@ SDL_Renderer *UI_Renderer;
 TTF_Font *UI_Font;
 UI_Element *UI_Focus;
 SDL_Color *UI_FocusColor;
+control_t UI_Select;
+control_t UI_Left;
+control_t UI_Right;
+control_t UI_Up;
+control_t UI_Down;
 
 #endif /*UI_H*/

@@ -6,14 +6,14 @@
 const static float G = 0.005;
 
 typedef struct {
-    Uint8 *button;
-    Uint8 *hat;
-    Uint8 *pos_axis;
-    Uint8 *neg_axis;
+    Sint8 button;
+    Sint8 hat;
+    Sint8 pos_axis;
+    Sint8 neg_axis;
 } controller_t;
 
 typedef struct {
-    SDL_Scancode *key;
+    SDL_Scancode key;
     controller_t *controller;
     SDL_Rect *touch;
 } control_t;
