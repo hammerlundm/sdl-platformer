@@ -71,6 +71,7 @@ UI_Element *UI_NewEmpty(SDL_Color *bg, SDL_Color *fg, UI_Element *parent) {
         UI_Layout *l = parent->element;
         vInsert(l->elements, element);
     }
+    UI_Focus = element;
     return element;
 }
 
