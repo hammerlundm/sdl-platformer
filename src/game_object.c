@@ -54,7 +54,7 @@ void respond(SDL_Event *evt, GameObject *obj) {
     }
 }
 
-Component *getComponent(GameObject *obj, Type t) {
+Component *getComponent(GameObject *obj, ComponentType t) {
     Component *c;
     for (int i = 0; i < obj->components->count; i++) {
         c = vGet(obj->components, i);

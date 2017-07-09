@@ -8,7 +8,20 @@ typedef enum {
     SPRITE,
     CONTROL,
     COLLISION
-} Type;
+} ComponentType;
+
+typedef enum {
+    NONE=0,
+    UP,
+    LEFT,
+    DOWN,
+    RIGHT
+} Direction;
+
+typedef enum {
+    TOP,
+    SIDE
+} SceneType;
 
 typedef struct GameObject GameObject;
 
@@ -16,7 +29,7 @@ typedef struct {
     void *data;
     void (*update)(Uint32 interval, GameObject *self);
     void (*respond)(SDL_Event *event, GameObject *self);
-    Type type;
+    ComponentType type;
 } Component;
 
 

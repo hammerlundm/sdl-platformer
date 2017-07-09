@@ -43,7 +43,7 @@ void updateCollision(Uint32 interval, GameObject *self) {
             if (temp) {
                 c2 = temp->data;
                 if (c2) {
-                    collision_t collision = checkCollision(c1->bounds, c2->bounds);
+                    Direction collision = checkCollision(c1->bounds, c2->bounds);
                     if (collision) {
                         SDL_Event event;
                         event.type = COLLISIONEVENT;
@@ -70,13 +70,13 @@ void respondCollision(SDL_Event *event, GameObject *self) {
         CollisionData *c2 = getComponent(event->user.data2, COLLISION)->data;
         if (!c1->fixed) {
             switch (event->user.code) {
-            case TOP:
+            case UP:
                 move(self, 0, c2->bounds.y - c1->bounds.y - c1->bounds.h);
                 break;
             case LEFT:
                 move(self, c2->bounds.x - c1->bounds.x - c1->bounds.w, 0);
                 break;
-            case BOTTOM:
+            case DOWN:
                 move(self, 0, c2->bounds.y + c2->bounds.h - c1->bounds.y);
                 break;
             case RIGHT:
@@ -87,17 +87,17 @@ void respondCollision(SDL_Event *event, GameObject *self) {
     }
 }
 
-collision_t checkCollision(SDL_Rect r1, SDL_Rect r2) {
+Direction checkCollision(SDL_Rect r1, SDL_Rect r2) {
     if (r1.x < r2.x + r2.w && r1.x + r1.w > r2.x && r1.y < r2.y + r2.h && r1.y + r1.h > r2.y) {
         int tc = r1.y + r1.h - r2.y;
         int bc = r2.y + r2.h - r1.y;
         int lc = r1.x + r1.w - r2.x;
         int rc = r2.x + r2.w - r1.x;
         if (tc < bc && tc < lc && tc < rc) {
-            return TOP;
+            return UP;
         }
         if (bc < tc && bc < lc && bc < rc) {
-            return BOTTOM;
+            return DOWN;
         }
         if (lc < tc && lc < bc && lc < rc) {
             return LEFT;

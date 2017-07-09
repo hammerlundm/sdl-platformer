@@ -22,15 +22,19 @@ typedef struct {
    float vy;
    float vx;
    Uint32 friction;
+   SceneType type;
    control_t *up;
+   control_t *down;
    control_t *left;
    control_t *right;
 } ControlData;
 
-Component *Control(Uint32 friction, control_t *up, control_t *left, control_t *right);
+Component *ControlTop(Uint32 friction, control_t *up, control_t *down, control_t *left, control_t *right);
+Component *ControlSide(Uint32 friction, control_t *up, control_t *down, control_t *left, control_t *right);
 void deleteControl(Component *control);
 
-void updateControl(Uint32 interval, GameObject *self);
+void updateControlTop(Uint32 interval, GameObject *self);
+void updateControlSide(Uint32 interval, GameObject *self);
 void respondControl(SDL_Event *evt, GameObject *self);
 
 float getInput(control_t *controls);

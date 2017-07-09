@@ -4,20 +4,43 @@
 #include "collision.h"
 #include "math.h"
 
-Component *Control(Uint32 friction, control_t *up, control_t *left, control_t *right) {
+Component *ControlTop(Uint32 friction, control_t *up, control_t *down, control_t *left, control_t *right) {
     Component *control = malloc(sizeof(Component));
     ControlData *data = malloc(sizeof(ControlData));
 
     data->vx = 0;
     data->vy = 0;
     data->friction = friction;
+    data->type = TOP;
     data->up = up;
+    data->down = down;
     data->left = left;
     data->right = right;
 
     control->data = data;
-    control->update = updateControl;
-    control->respond =respondControl;
+    control->update = updateControlTop;
+    control->respond = respondControl;
+    control->type = CONTROL;
+
+    return control;
+}
+
+Component *ControlSide(Uint32 friction, control_t *up, control_t *down, control_t *left, control_t *right) {
+    Component *control = malloc(sizeof(Component));
+    ControlData *data = malloc(sizeof(ControlData));
+
+    data->vx = 0;
+    data->vy = 0;
+    data->friction = friction;
+    data->type = SIDE;
+    data->up = up;
+    data->down = down;
+    data->left = left;
+    data->right = right;
+
+    control->data = data;
+    control->update = updateControlSide;
+    control->respond = respondControl;
     control->type = CONTROL;
 
     return control;
@@ -36,12 +59,21 @@ void deleteControl(Component *control) {
     #endif
 }
 
-void updateControl(Uint32 interval, GameObject *self) {
+void updateControlTop(Uint32 interval, GameObject *self) {
+    ControlData *data = getComponent(self, CONTROL)->data;
+    data->vx += (getInput(data->right) - getInput(data->left)) / 10;
+    data->vx *= pow(0.5, (float) interval / data->friction);
+    data->vy += (getInput(data->down) - getInput(data->up)) / 10;
+    data->vy *= pow(0.5, (float) interval / data->friction);
+    move(self, data->vx * interval, data->vy * interval);
+}
+
+void updateControlSide(Uint32 interval, GameObject *self) {
     ControlData *data = getComponent(self, CONTROL)->data;
     Component *collision = getComponent(self, COLLISION);
     if (collision) {
         CollisionData *cd = collision->data;
-        if (cd->collision == TOP) {
+        if (cd->collision == UP) {
             data->vy = -2*getInput(data->up);
         }
         else {
@@ -60,7 +92,7 @@ void updateControl(Uint32 interval, GameObject *self) {
 void respondControl(SDL_Event *evt, GameObject *self) {
     if (evt->type == COLLISIONEVENT && evt->user.data1 == self) {
         ControlData *data = getComponent(self, CONTROL)->data;
-        if (evt->user.code == TOP || evt->user.code == BOTTOM) {
+        if (evt->user.code == UP || evt->user.code == DOWN) {
             data->vy = 0;
         }
         else if (evt->user.code == LEFT || evt->user.code == RIGHT) {
