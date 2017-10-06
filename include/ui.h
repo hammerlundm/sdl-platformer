@@ -6,6 +6,7 @@
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_ttf.h"
 #include "SDL2/SDL_image.h"
+#include <limits.h>
 
 typedef enum {
     UI_BUTTON,
@@ -96,6 +97,7 @@ void UI_RespondElement(UI_Element *e, SDL_Rect *rect, SDL_Event *evt);
 void UI_Init(SDL_Renderer *renderer, TTF_Font *font, SDL_Color *focused);
 void UI_Quit();
 
+SDL_Surface *glyphs[CHAR_MAX];
 SDL_Renderer *UI_Renderer;
 TTF_Font *UI_Font;
 UI_Element *UI_Focus;

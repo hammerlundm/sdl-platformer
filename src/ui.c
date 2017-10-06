@@ -2,37 +2,42 @@
 #include "control.h"
 
 SDL_Texture *UI_RenderLines(const char *message, SDL_Color *c) {
-    int len = strlen(message);
-    char *copy = malloc(sizeof(char)*(len+1));
-    strcpy(copy, message);
-    vector *surfaces = newVector();
-    char *line = strtok(copy, "\n");
-    while (line) {
-        vInsert(surfaces, TTF_RenderText_Blended(UI_Font, line, *c));
-        line = strtok(NULL, "\n");
-    }
     int w = 0;
-    int h = 0;
-    SDL_Surface *s;
-    for (int i = 0; i < surfaces->count; i++) {
-        s = vGet(surfaces, i);
-        if (s->w > w) w = s->w;
-        h += s->h;
+    int max_w = 0;
+    int lines = 1;
+    SDL_Surface *surf;
+    for (int i = 0; message[i] != '\0'; i++) {
+        if (message[i] == '\n') {
+            lines++;
+            max_w = 0;
+        }
+        else {
+            if (glyphs[message[i]] == NULL) {
+                glyphs[message[i]] = TTF_RenderGlyph_Solid(UI_Font, message[i], *c);
+            }
+            max_w += glyphs[message[i]]->w;
+            if (max_w > w) {
+                w = max_w;
+            }
+        }
     }
-    SDL_Surface *surf = SDL_CreateRGBSurfaceWithFormat(0, w, h, 32, SDL_PIXELFORMAT_RGBA32);
-    SDL_Rect r = (SDL_Rect) {0,h,0,0};
-    while (surfaces->count > 0) {
-        s = vPop(surfaces);
-        r.h = s->h;
-        r.w = s->w;
-        r.y -= s->h;
-        SDL_BlitSurface(s, NULL, surf, &r);
-        SDL_FreeSurface(s);
+    int line_height = TTF_FontHeight(UI_Font);
+    surf = SDL_CreateRGBSurfaceWithFormat(0, w, lines*line_height, 32, SDL_PIXELFORMAT_RGBA32);
+    SDL_Rect r = (SDL_Rect) {0, 0, 0, 0};
+    for (int i = 0; message[i] != '\0'; i++) {
+        if (message[i] == '\n') {
+            r.y += line_height;
+            r.x = 0;
+        }
+        else {
+            r.w = glyphs[message[i]]->w;
+            r.h = glyphs[message[i]]->h;
+            SDL_BlitSurface(glyphs[message[i]], NULL, surf, &r);
+            r.x += r.w;
+        }
     }
-    deleteVector(surfaces);
     SDL_Texture *text = SDL_CreateTextureFromSurface(UI_Renderer, surf);
     SDL_FreeSurface(surf);
-    free(copy);
     return text;
 }
 
@@ -203,7 +208,7 @@ void UI_DrawElement(UI_Element *e, SDL_Rect *rect, void *thing) {
             h = rect->h;
         }
         if (e->scale == UI_SCALE) {
-            if (w > h && rect->w > rect->h || h >= w && rect->h >= rect->w) {
+            if ((w > h && rect->w > rect->h) || (h >= w && rect->h >= rect->w)) {
                 if (w/(float)h > rect->w/(float)rect->h) {
                     h = (rect->w * h) / w;
                     w = rect->w;
